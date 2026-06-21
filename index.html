@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To my TOTGA</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&display=swap');
+
+        :root {
+            --bg-color: #f4f1ea; 
+            --env-color: #c9ad93;
+            --env-flap: #b89a7d;
+            --ink-color: #1a1a1a; 
+            --gold-ink: #9d7c39;
+            --parchment-base: #f7f0e3;
+            --parchment-edge: #e6dcc8;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            perspective: 1200px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- MUSIC BUTTON --- */
+        .music-toggle {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 45px;
+            height: 45px;
+            background: var(--env-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 2px solid var(--gold-ink);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+        .music-toggle:hover { opacity: 1; transform: scale(1.1); }
+        .music-toggle svg { fill: var(--ink-color); width: 22px; }
+
+        /* --- ENVELOPE --- */
+        .envelope-wrapper {
+            position: relative;
+            width: 90vw;
+            max-width: 380px;
+            aspect-ratio: 35 / 25;
+            cursor: pointer;
+            z-index: 5;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* HOVER EFFECT: Lift envelope */
+        .envelope-wrapper:hover {
+            transform: translateY(-10px);
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: var(--env-color);
+            background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            z-index: 4;
+            border-radius: 4px;
+        }
+
+        .envelope::after {
+            content: "To: Honey";
+            position: absolute;
+            top: 75%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.8rem, 7vw, 2.5rem);
+            color: rgba(26, 26, 26, 0.7);
+            pointer-events: none;
+        }
+
+        .flap {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 60%;
+            background-color: var(--env-flap);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transform-origin: top;
+            transition: transform 0.6s ease-in-out;
+            z-index: 6;
+        }
+
+        /* --- HEART SEAL (heart.png) --- */
+        .heart-seal {
+            position: absolute;
+            top: 55%; 
+            left: 50%;
+            width: 80px; 
+            height: auto;
+            transform: translate(-50%, -50%) rotate(10deg);
+            z-index: 10;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+            transition: opacity 0.4s, transform 0.3s ease;
+        }
+
+        /* HOVER EFFECT: Pulse the heart */
+        .envelope-wrapper:hover .heart-seal {
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+
+        .open .heart-seal { opacity: 0; pointer-events: none; }
+
+        /* --- LETTER --- */
+        .letter {
+            position: absolute;
+            bottom: 5%;
+            left: 5%;
+            width: 90%;
+            height: 90%;
+            z-index: 2;
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            background: var(--parchment-base);
+            background-image: 
+                radial-gradient(circle at 50% 50%, transparent 80%, rgba(210,180,140,0.15) 100%),
+                url("https://www.transparenttextures.com/patterns/p6.png");
+            box-shadow: 2px 2px 15px rgba(0,0,0,0.1);
+            border: 1px solid var(--parchment-edge);
+        }
+
+        .letter-content {
+            font-family: 'Dancing Script', cursive;
+            color: var(--ink-color);
+            opacity: 0;
+            transition: opacity 0.5s;
+            height: 100%;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 40px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 35px;
+            height: 35px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0;
+            z-index: 12;
+        }
+
+        /* OPEN/EXPAND STATES */
+        .open .flap { transform: rotateX(180deg); z-index: 1; }
+        .open .letter { bottom: 65%; z-index: 3; }
+        .open.envelope-wrapper:hover { transform: none; } /* Stop floating after open */
+
+        .expanded .letter {
+            width: 95vw;
+            height: 92vh;
+            bottom: 50%;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            z-index: 10;
+        }
+        
+        .expanded .letter-content { 
+            opacity: 1; 
+            padding: clamp(30px, 8vw, 80px); 
+            font-size: clamp(1.2rem, 5vw, 1.8rem); 
+        }
+        .expanded .close-btn { opacity: 1; }
+
+        .instruction {
+            position: fixed;
+            bottom: 30px;
+            color: #8c6a50;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        /* Petals */
+        .petal {
+            position: absolute;
+            background-color: #ffdae0;
+            border-radius: 150% 0 150% 0;
+            opacity: 0.4;
+            z-index: 0;
+            animation: float 10s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+            100% { transform: translateY(110vh) translateX(100px) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="music-toggle" id="music-toggle">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+    </div>
+
+    <div id="petal-container"></div>
+
+    <div class="envelope-wrapper" id="env-wrapper">
+        <div class="flap"></div>
+        <img src="heart.png" class="heart-seal" id="heart-seal" alt="Seal">
+
+        <div class="letter" id="letter">
+            <div class="close-btn" id="close-btn">&times;</div>
+            <div class="letter-content">
+                <p style="font-size: 1.2em; font-weight: 700;">Hi Hon,</p>
+                    <p>Content</p>
+  
+              
+                <p style="font-size: 1.6em; margin-top: 30px; font-weight: 700;">Mic</p>
+            </div>
+        </div>
+        <div class="envelope"></div>
+    </div>
+
+    <div class="instruction">Tap the heart to open</div>
+
+    <script>
+        const wrapper = document.getElementById('env-wrapper');
+        const closeBtn = document.getElementById('close-btn');
+        const musicToggle = document.getElementById('music-toggle');
+        const bgMusic = document.getElementById('bg-music');
+        
+        musicToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (bgMusic.paused) { bgMusic.play(); musicToggle.style.opacity = "1"; }
+            else { bgMusic.pause(); musicToggle.style.opacity = "0.6"; }
+        });
+
+        function createPetals() {
+            const container = document.getElementById('petal-container');
+            for (let i = 0; i < 15; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.style.left = Math.random() * 100 + 'vw';
+                petal.style.width = Math.random() * 15 + 10 + 'px';
+                petal.style.height = petal.style.width;
+                petal.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(petal);
+            }
+        }
+        createPetals();
+
+        wrapper.addEventListener('click', () => {
+            if (wrapper.classList.contains('expanded')) return;
+            if (!wrapper.classList.contains('open')) {
+                wrapper.classList.add('open');
+                document.querySelector('.instruction').innerText = "Tap letter to read";
+            } else {
+                wrapper.classList.add('expanded');
+                document.querySelector('.instruction').style.opacity = "0";
+            }
+        });
+
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            wrapper.classList.remove('expanded', 'open');
+            document.querySelector('.instruction').innerText = "Tap the heart to open";
+            document.querySelector('.instruction').style.opacity = "0.7";
+        });
+    </script>
+</body>
+</html>
